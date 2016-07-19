@@ -7,7 +7,7 @@ this["Handlebars"]["templates"]["tipbar"] = Handlebars.template(function (Handle
 function program1(depth0,data) {
   
   
-  return "x";}
+  return "&times;";}
 
 function program3(depth0,data) {
   
@@ -355,7 +355,7 @@ function program21(depth0,data) {
   if(foundHelper && typeof stack1 === functionType) { stack1 = stack1.call(depth0, tmp1); }
   else { stack1 = blockHelperMissing.call(depth0, stack1, tmp1); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "</button>\n        </div>\n    </div>\n\n    <!-- Editor -->\n    <div class=\"scratchpad-editor-wrap overlay-container\">\n        <div class=\"scratchpad-editor-tabs\">\n          <div id=\"scratchpad-code-editor-tab\" class=\"scratchpad-editor-tab\">\n            <div class=\"scratchpad-editor scratchpad-ace-editor\"></div>\n            <div class=\"overlay disable-overlay\" style=\"display:none;\">\n            </div>\n\n            <div class=\"scratchpad-editor-bigplay-loading\" style=\"display:none;\">\n                <img src=\"";
+  buffer += "</button>\n            <div class=\"pull-right\">\n              <input id=\"enable-live\" class=\"pull-right\" type=\"checkbox\"> Enable live\n            </div>\n        </div>\n    </div>\n\n    <!-- Editor -->\n    <div class=\"scratchpad-editor-wrap overlay-container\">\n        <div class=\"scratchpad-editor-tabs\">\n          <div id=\"scratchpad-code-editor-tab\" class=\"scratchpad-editor-tab\">\n            <div class=\"scratchpad-editor scratchpad-ace-editor\"></div>\n            <div class=\"overlay disable-overlay\" style=\"display:none;\">\n            </div>\n\n            <div class=\"scratchpad-editor-bigplay-loading\" style=\"display:none;\">\n                <img src=\"";
   foundHelper = helpers.imagesDir;
   stack1 = foundHelper || depth0.imagesDir;
   if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -938,6 +938,7 @@ window.LiveEditor = Backbone.View.extend({
         OUTPUT_DIV: "#output",
         ALL_OUTPUT: "#output, #output-frame",
         RESTART_BUTTON: "#restart-code",
+        ENABLE_LIVE_CHECK: "#enable-live",
         GUTTER_ERROR: ".ace_error",
         ERROR_BUDDY_HAPPY: ".error-buddy-happy",
         ERROR_BUDDY_THINKING: ".error-buddy-thinking"
@@ -1170,7 +1171,16 @@ window.LiveEditor = Backbone.View.extend({
         });
 
         // Handle the restart button
-        $el.delegate(this.dom.RESTART_BUTTON, "click", this.restartCode.bind(this));
+        // $el.delegate(this.dom.RESTART_BUTTON, "click",
+        //     this.restartCode.bind(this));
+        $el.delegate(this.dom.RESTART_BUTTON, "click", function () {
+            if (_this.$el.find(_this.dom.ENABLE_LIVE_CHECK).prop("checked")) {
+                _this.restartCode();
+            } else {
+                _this.restartCode();
+                _this.markDirty();
+            }
+        });
 
         this.handleMessagesBound = this.handleMessages.bind(this);
         $(window).on("message", this.handleMessagesBound);
@@ -1182,6 +1192,7 @@ window.LiveEditor = Backbone.View.extend({
 
         // Whenever the user changes code, execute the code
         this.editor.on("change", function () {
+            if (!_this.$el.find(_this.dom.ENABLE_LIVE_CHECK).prop("checked")) return;
             _this.markDirty();
         });
 
@@ -1196,6 +1207,7 @@ window.LiveEditor = Backbone.View.extend({
         // This function will fire once after each synchrynous block which changes the cursor
         // or the current selection. We use it for tag highlighting in webpages.
         var cursorDirty = function cursorDirty() {
+            console.log("cursorDirty");
             if (self.outputState !== "clean") {
                 // This will fire after markDirty() itself gets a chance to start a new run
                 // So it will just keep resetting itself until one run comes back and there are
@@ -2279,6 +2291,8 @@ window.LiveEditor = Backbone.View.extend({
     markDirty: function markDirty() {
         var _this2 = this;
 
+        // FIXME: very adhoc way.
+        console.log("markDirty");
         // makeDirty is called when you type something in the editor. When this
         // happens, we want to run the code, but also want to throttle how often
         // we re-run so we can wait for the results of running it to come back.

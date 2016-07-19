@@ -161,7 +161,7 @@ function program21(depth0,data) {
   if(foundHelper && typeof stack1 === functionType) { stack1 = stack1.call(depth0, tmp1); }
   else { stack1 = blockHelperMissing.call(depth0, stack1, tmp1); }
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "</button>\n        </div>\n    </div>\n\n    <!-- Editor -->\n    <div class=\"scratchpad-editor-wrap overlay-container\">\n        <div class=\"scratchpad-editor-tabs\">\n          <div id=\"scratchpad-code-editor-tab\" class=\"scratchpad-editor-tab\">\n            <div class=\"scratchpad-editor scratchpad-ace-editor\"></div>\n            <div class=\"overlay disable-overlay\" style=\"display:none;\">\n            </div>\n\n            <div class=\"scratchpad-editor-bigplay-loading\" style=\"display:none;\">\n                <img src=\"";
+  buffer += "</button>\n            <div class=\"pull-right\">\n              <input id=\"enable-live\" class=\"pull-right\" type=\"checkbox\"> Enable live\n            </div>\n        </div>\n    </div>\n\n    <!-- Editor -->\n    <div class=\"scratchpad-editor-wrap overlay-container\">\n        <div class=\"scratchpad-editor-tabs\">\n          <div id=\"scratchpad-code-editor-tab\" class=\"scratchpad-editor-tab\">\n            <div class=\"scratchpad-editor scratchpad-ace-editor\"></div>\n            <div class=\"overlay disable-overlay\" style=\"display:none;\">\n            </div>\n\n            <div class=\"scratchpad-editor-bigplay-loading\" style=\"display:none;\">\n                <img src=\"";
   foundHelper = helpers.imagesDir;
   stack1 = foundHelper || depth0.imagesDir;
   if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }

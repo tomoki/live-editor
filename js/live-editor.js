@@ -22,6 +22,7 @@ window.LiveEditor = Backbone.View.extend({
         OUTPUT_DIV: "#output",
         ALL_OUTPUT: "#output, #output-frame",
         RESTART_BUTTON: "#restart-code",
+        ENABLE_LIVE_CHECK: "#enable-live",
         GUTTER_ERROR: ".ace_error",
         ERROR_BUDDY_HAPPY: ".error-buddy-happy",
         ERROR_BUDDY_THINKING: ".error-buddy-thinking",
@@ -255,8 +256,18 @@ window.LiveEditor = Backbone.View.extend({
         });
 
         // Handle the restart button
+        // $el.delegate(this.dom.RESTART_BUTTON, "click",
+        //     this.restartCode.bind(this));
         $el.delegate(this.dom.RESTART_BUTTON, "click",
-            this.restartCode.bind(this));
+                     () => {
+                       if((this.$el.find(this.dom.ENABLE_LIVE_CHECK).prop("checked"))){
+                         this.restartCode();
+                       }else{
+                         this.restartCode();
+                         this.markDirty();
+                       }
+                     });
+
 
         this.handleMessagesBound = this.handleMessages.bind(this);
         $(window).on("message", this.handleMessagesBound);
@@ -268,6 +279,7 @@ window.LiveEditor = Backbone.View.extend({
 
         // Whenever the user changes code, execute the code
         this.editor.on("change", () => {
+            if(!(this.$el.find(this.dom.ENABLE_LIVE_CHECK).prop("checked"))) return;
             this.markDirty();
         });
 
@@ -282,6 +294,7 @@ window.LiveEditor = Backbone.View.extend({
         // This function will fire once after each synchrynous block which changes the cursor
         // or the current selection. We use it for tag highlighting in webpages.
         var cursorDirty = function() {
+            console.log("cursorDirty");
             if (self.outputState !== "clean" ) {
                 // This will fire after markDirty() itself gets a chance to start a new run
                 // So it will just keep resetting itself until one run comes back and there are
@@ -1401,7 +1414,9 @@ window.LiveEditor = Backbone.View.extend({
         this.postFrame(options);
     }, 20),
 
-    markDirty: function() {
+  markDirty: function() {
+        // FIXME: very adhoc way.
+        console.log("markDirty");
         // makeDirty is called when you type something in the editor. When this
         // happens, we want to run the code, but also want to throttle how often
         // we re-run so we can wait for the results of running it to come back.
