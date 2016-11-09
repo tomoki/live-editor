@@ -280,4 +280,7 @@ gulp.task("build",
         firstBuild = false;
     });
 
+gulp.task("cont", function(){
+    gulp.watch(["./js/**/*"], ["default"]);
+});
 gulp.task("default", ["watch", "build"]);
