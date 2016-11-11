@@ -1026,6 +1026,9 @@ window.LiveEditor = Backbone.View.extend({
         if (window.location.search.indexOf("new_error_experience=yes") !== -1) {
             this.newErrorExperience = true;
         }
+        if (window.location.search.indexOf("new_error_experience=no") !== -1) {
+            this.newErrorExperience = false;
+        }
 
         if (options.enableLoopProtect != null) {
             this.enableLoopProtect = options.enableLoopProtect;
@@ -1192,8 +1195,11 @@ window.LiveEditor = Backbone.View.extend({
 
         // Whenever the user changes code, execute the code
         this.editor.on("change", function () {
-            if (!_this.$el.find(_this.dom.ENABLE_LIVE_CHECK).prop("checked")) return;
-            _this.markDirty();
+            if (!_this.$el.find(_this.dom.ENABLE_LIVE_CHECK).prop("checked")) {
+                _this.lintOnly();
+            } else {
+                _this.markDirty();
+            }
         });
 
         this.editor.on("userChangedCode", function () {
@@ -1924,6 +1930,7 @@ window.LiveEditor = Backbone.View.extend({
     },
 
     handleMessages: function handleMessages(e) {
+        console.log(e);
         // DANGER!  The data coming in from the iframe could be anything,
         // because with some cleverness the author of the program can send an
         // arbitrary message up to us.  We need to be careful to sanitize it
@@ -2240,6 +2247,7 @@ window.LiveEditor = Backbone.View.extend({
     },
 
     postFrame: function postFrame(data) {
+        console.log(data);
         // Send the data to the frame using postMessage
         this.$el.find("#output-frame")[0].contentWindow.postMessage(JSON.stringify(data), this.postFrameOrigin());
     },
@@ -2253,6 +2261,26 @@ window.LiveEditor = Backbone.View.extend({
      */
     restartCode: function restartCode() {
         this.postFrame({ restart: true });
+    },
+    // used for static check
+    lintOnly: function lintOnly() {
+        this.postFrame({
+            code: arguments.length === 0 ? this.editor.text() : code,
+            cursor: this.editor.getSelectionIndices ? this.editor.getSelectionIndices() : -1,
+            validate: this.validation || "",
+            noLint: this.noLint,
+            version: this.config.curVersion(),
+            settings: this.settings || {},
+            workersDir: this.workersDir,
+            externalsDir: this.externalsDir,
+            imagesDir: this.imagesDir,
+            soundsDir: this.soundsDir,
+            redirectUrl: this.redirectUrl,
+            jshintFile: this.jshintFile,
+            outputType: this.outputType,
+            enableLoopProtect: this.enableLoopProtect,
+            lintOnly: true // don't run but only lint.
+        });
     },
 
     /*

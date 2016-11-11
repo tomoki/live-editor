@@ -112,6 +112,9 @@ window.LiveEditor = Backbone.View.extend({
         if (window.location.search.indexOf("new_error_experience=yes") !== -1) {
             this.newErrorExperience = true;
         }
+        if (window.location.search.indexOf("new_error_experience=no") !== -1) {
+            this.newErrorExperience = false;
+        }
 
         if (options.enableLoopProtect != null) {
             this.enableLoopProtect = options.enableLoopProtect;
@@ -268,7 +271,6 @@ window.LiveEditor = Backbone.View.extend({
                        }
                      });
 
-
         this.handleMessagesBound = this.handleMessages.bind(this);
         $(window).on("message", this.handleMessagesBound);
 
@@ -279,8 +281,11 @@ window.LiveEditor = Backbone.View.extend({
 
         // Whenever the user changes code, execute the code
         this.editor.on("change", () => {
-            if(!(this.$el.find(this.dom.ENABLE_LIVE_CHECK).prop("checked"))) return;
-            this.markDirty();
+            if(!(this.$el.find(this.dom.ENABLE_LIVE_CHECK).prop("checked"))){
+                this.lintOnly();
+            }else{
+                this.markDirty();
+            }
         });
 
         this.editor.on("userChangedCode", () => {
@@ -288,6 +293,7 @@ window.LiveEditor = Backbone.View.extend({
               this.trigger("userChangedCode");
             }
         });
+
 
         this.on("runDone", this.runDone.bind(this));
 
@@ -466,6 +472,7 @@ window.LiveEditor = Backbone.View.extend({
         $el.on("click", this.dom.RESTART_BUTTON, function() {
             self.record.log("restart");
         });
+
 
         // Handle the gutter errors
         $el.on("click", this.dom.GUTTER_ERROR, function() {
@@ -1037,6 +1044,7 @@ window.LiveEditor = Backbone.View.extend({
     },
 
     handleMessages: function(e) {
+        console.log(e);
         // DANGER!  The data coming in from the iframe could be anything,
         // because with some cleverness the author of the program can send an
         // arbitrary message up to us.  We need to be careful to sanitize it
@@ -1365,6 +1373,7 @@ window.LiveEditor = Backbone.View.extend({
     },
 
     postFrame: function(data) {
+        console.log(data);
         // Send the data to the frame using postMessage
         this.$el.find("#output-frame")[0].contentWindow.postMessage(
             JSON.stringify(data), this.postFrameOrigin());
@@ -1379,6 +1388,26 @@ window.LiveEditor = Backbone.View.extend({
      */
     restartCode: function() {
         this.postFrame({ restart: true });
+    },
+    // used for static check
+    lintOnly: function(){
+        this.postFrame({
+            code: arguments.length === 0 ? this.editor.text() : code,
+            cursor: this.editor.getSelectionIndices ? this.editor.getSelectionIndices() : -1,
+            validate: this.validation || "",
+            noLint: this.noLint,
+            version: this.config.curVersion(),
+            settings: this.settings || {},
+            workersDir: this.workersDir,
+            externalsDir: this.externalsDir,
+            imagesDir: this.imagesDir,
+            soundsDir: this.soundsDir,
+            redirectUrl: this.redirectUrl,
+            jshintFile: this.jshintFile,
+            outputType: this.outputType,
+            enableLoopProtect: this.enableLoopProtect,
+            lintOnly: true // don't run but only lint.
+        });
     },
 
     /*

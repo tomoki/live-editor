@@ -459,8 +459,13 @@ window.LiveEditorOutput = Backbone.View.extend({
             this.settings = data.settings;
         }
 
+        if (data.code != null && data.lintOnly) {
+            this.config.switchVersion(data.version);
+            this.lintOnly(data.code, undefined);
+        }
+
         // Code to be executed
-        if (data.code != null) {
+        if (data.code != null && !data.lintOnly) {
             this.config.switchVersion(data.version);
             this.runCode(data.code, undefined, data.noLint);
         }
@@ -472,7 +477,7 @@ window.LiveEditorOutput = Backbone.View.extend({
         }
 
         // Restart the output
-        if (data.restart) {
+        if (data.restart && !data.lintOnly) {
             this.restart();
         }
 
@@ -551,6 +556,28 @@ window.LiveEditorOutput = Backbone.View.extend({
                 priority: 3
             };
         }
+    },
+
+    lintOnly: function lintOnly(userCode, callback) {
+        this.currentCode = userCode;
+        var timestamp = Date.now();
+        this.results = {
+            timestamp: timestamp,
+            code: userCode,
+            errors: [],
+            assertions: [],
+            warnings: []
+        };
+
+        this.output.lint(userCode, false).then((function (lintResults) {
+            this.lintErrors = lintResults.errors;
+            this.lintErrors.timestamp = timestamp;
+            this.lintWarnings = lintResults.warnings;
+            this.lintWarnings.timestamp = timestamp;
+            return $.Deferred().resolve();
+        }).bind(this)).then((function () {
+            this.buildDone(userCode, callback);
+        }).bind(this));
     },
 
     /**
