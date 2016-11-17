@@ -206,7 +206,17 @@ var PJSCodeInjector = (function () {
                     console.log.apply(console, arguments);
                 }
             });
-
+            // modify print behavior for Array
+            var original_println = this.processing.println;
+            Object.assign(this.processing, {
+                println: function println(message) {
+                    if (Array.isArray(message)) {
+                        original_println(JSON.stringify(message));
+                    } else {
+                        original_println(message);
+                    }
+                }
+            });
             Object.assign(this.processing, additionalMethods);
         }
     }, {

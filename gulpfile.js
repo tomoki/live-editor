@@ -281,6 +281,6 @@ gulp.task("build",
     });
 
 gulp.task("cont", function(){
-    gulp.watch(["./js/**/*"], ["default"]);
+    gulp.watch(["./js/**/*", "./tmpl/**/*"], ["default"]);
 });
 gulp.task("default", ["watch", "build"]);
