@@ -19,6 +19,7 @@
         #sample-live-editor {
             padding: 0;
         }
+
     </style>
 </head>
 <body>
@@ -80,7 +81,17 @@
         window.localStorage[save_file] = liveEditor.editor.text();
     });
 
-    document.getElementById("enable-live").checked = params.live === "true";
+    var will_be_live = params.live === "true";
+    document.getElementById("enable-live").checked = will_be_live;
+    // hide enable-live from user.
+    document.getElementById("enable-live").hidden = true;
+    document.getElementById("enable-live").nextSibling.remove();
+    if(will_be_live){
+        document.getElementById("restart-code").hidden = true;
+    }else{
+        document.getElementById("restart-code").textContent = "▶ Run";
+    }
+
     ScratchpadAutosuggest.init(liveEditor.editor.editor);
     </script>
 </body>
